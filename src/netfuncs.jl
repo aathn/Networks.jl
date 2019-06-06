@@ -8,7 +8,7 @@ following abstract types:
 
 # Activation functions
 struct Sigmoid <: ActivationFunc end
-(σ::Sigmoid)(z) = 1.0/(1.0+e^(-z))
+(σ::Sigmoid)(z) = 1.0/(1.0+exp(-z))
 activation_deriv(σ::Sigmoid, z) = σ(z)*(1-σ(z))
 
 struct Linear <: ActivationFunc end

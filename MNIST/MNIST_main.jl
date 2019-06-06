@@ -1,5 +1,6 @@
-using Networks
+include("../src/Networks.jl")
 include("MNIST_load.jl")
+using Main.Networks
 
 function main()
     net = sequential([784, 30, 10], Sigmoid(), CrossEntropy())

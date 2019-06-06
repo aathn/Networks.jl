@@ -42,26 +42,27 @@ end
 
 function SGDtrain(net::sequential, training_data, epochs, mini_batch_size, η; 
     test_data=nothing, λ=0.0, verbose = false)
-    n_test = test_data != nothing ? length(test_data):nothing
+    n_test = test_data != nothing ? length(test_data) : nothing
     n = length(training_data)
     bcache = backprop_cache(net.sizes, mini_batch_size)
 
     for j in 1:epochs
-        tic()
-        training_data .= shuffle(training_data)
-        mini_batches = [training_data[k:k+mini_batch_size-1] for k in 1:mini_batch_size:n]
+        time_taken = @elapsed begin
+            training_data .= shuffle(training_data)
+            mini_batches = [training_data[k:k+mini_batch_size-1] for k in 1:mini_batch_size:n]
 
-        for batch in mini_batches
-            grad_desc(net, bcache, batch, η, λ, n)
-        end
+            for batch in mini_batches
+                grad_desc(net, bcache, batch, η, λ, n)
+            end
+        end 
 
         if verbose
-            toc()
             if test_data != nothing
                 println("Epoch ", j,": ", evaluate(net, test_data), "/", n_test)
             else
                 println("Epoch ", j," complete.")
             end
+            println("Time elapsed: $time_taken")
         end
     end
 end
@@ -89,7 +90,7 @@ function grad_desc(net::sequential, bcache::backprop_cache, batch, η, λ, n)
     ∇_w = bcache.∇_w
 
     for i in 1:length(net.biases)
-        net.biases[i] .-= η.*vec(mean(∇_b[i],2))
+        net.biases[i] .-= η.*vec(mean(∇_b[i];dims=2))
     end
 
     l2fac = 1.0-η*λ/n
@@ -115,7 +116,7 @@ function backprop!(net::sequential, bcache::backprop_cache)
 
     for i in 1:num_layers-1
         b = net.biases[i]; w = net.weights[i]
-        A_mul_B!(zs[i], w, activations[i])
+        mul!(zs[i], w, activations[i])
         zs[i] .+= b
         activations[i+1] .= net.activation.(zs[i])
     end
@@ -124,18 +125,18 @@ function backprop!(net::sequential, bcache::backprop_cache)
     δ .= delta.(net.cost, net.activation, zs[end], activations[end], Y)
     ∇_b[end] .= δ
     transpose!(a_transp[end], activations[end-1])
-    A_mul_B!(∇_w[end], δ, a_transp[end])
+    mul!(∇_w[end], δ, a_transp[end])
 
     for l in 1:num_layers-2
         z = zs[end-l]
         δ = δs[end-l]
         transpose!(w_transp[end-l+1], net.weights[end-l+1])
-        A_mul_B!(δ, w_transp[end-l+1], δs[end-l+1])
+        mul!(δ, w_transp[end-l+1], δs[end-l+1])
         δ .*= activation_deriv.(net.activation, z)
 
         ∇_b[end-l] .= δ
         transpose!(a_transp[end-l], activations[end-l-1])
-        A_mul_B!(∇_w[end-l], δ, a_transp[end-l])
+        mul!(∇_w[end-l], δ, a_transp[end-l])
     end
     return nothing
 end
