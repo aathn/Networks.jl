@@ -1,14 +1,4 @@
 ## Networks.jl
 
-This is a Julia package for neural networks. It is mainly for the sake
-of my personal learning, but I will strive to make it as generally
-applicable and optimized as I can.
-
-### Planned features
-- A modular design allowing the creation of networks with different
-  layer structures, regularization methods, cost functions etc.
-- Tools for visualizing and optimizing a network's performance
-- Example usage on well-known datasets
-
-### Dependecies
-*To be updated*
+This is a Julia package for neural networks, written for the sake of my personal learning.
+The implementation follows the book [Neural Networks and Deep Learning](http://neuralnetworksanddeeplearning.com/), and draws help from the following [Stack Overflow response](https://stackoverflow.com/a/49724611).
